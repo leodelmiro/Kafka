@@ -31,12 +31,19 @@ public class NewOrderServlet extends HttpServlet {
 
             var orderId = UUID.randomUUID().toString();
             var order = new Order(orderId, amount, email);
-            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order);
+            orderDispatcher.send("ECOMMERCE_NEW_ORDER",
+                    email,
+                    order,
+                    new CorrelationId(NewOrderServlet.class.getSimpleName())
+            );
 
             var subject = "Order";
             var body = "Thank You for your order! We are processing your order!";
             var emailMessage = new Email(subject, body);
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailMessage);
+            emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
+                    email,
+                    emailMessage,
+                    new CorrelationId(NewOrderServlet.class.getSimpleName()));
 
             System.out.println("New Order sent Successfully.");
             resp.setStatus(HttpServletResponse.SC_OK);

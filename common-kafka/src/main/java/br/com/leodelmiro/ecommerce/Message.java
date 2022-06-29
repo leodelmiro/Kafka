@@ -1,5 +1,7 @@
 package br.com.leodelmiro.ecommerce;
 
+import java.util.Collection;
+
 public class Message<T> {
     private final CorrelationId id;
     private final T payload;
