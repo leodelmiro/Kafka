@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 class KafkaDispatcher<T> implements Closeable {
 
-    private final KafkaProducer<String, T> producer;
+    private final KafkaProducer<String, Message<T>> producer;
 
     KafkaDispatcher() {
         this.producer = new KafkaProducer<>(properties());
@@ -26,7 +26,8 @@ class KafkaDispatcher<T> implements Closeable {
         return properties;
     }
 
-    void send(String topic, String key, T value) throws ExecutionException, InterruptedException {
+    void send(String topic, String key, T payload) throws ExecutionException, InterruptedException {
+        var value = new Message<>(new CorrelationId(), payload);
         var record = new ProducerRecord<>(topic, key, value);
 
         Callback callback = (data, ex) -> {
@@ -34,7 +35,12 @@ class KafkaDispatcher<T> implements Closeable {
                 ex.printStackTrace();
                 return;
             }
-            System.out.println("sucesso enviando " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/ timestamp " + data.timestamp());
+            System.out.println(
+                    "sucesso enviando " + data.topic() +
+                            ":::partition " + data.partition() +
+                            "/ offset " + data.offset()
+                            + "/ timestamp " + data.timestamp()
+            );
         };
 
         producer.send(record, callback).get();

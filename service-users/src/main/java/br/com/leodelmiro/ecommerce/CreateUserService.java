@@ -31,18 +31,18 @@ public class CreateUserService {
         try (var service = new KafkaService<>(CreateUserService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
                 creatUserService::parse,
-                Order.class,
                 Map.of())
         ) {
             service.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, Order> record) throws SQLException {
+    private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+        var message = record.value();
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking new user");
-        System.out.println(record.value());
-        var order = record.value();
+        System.out.println(message.getPayload());
+        var order = message.getPayload();
         if (isNewUser(order.getEmail())) {
             insertNewUser(order.getEmail());
         }

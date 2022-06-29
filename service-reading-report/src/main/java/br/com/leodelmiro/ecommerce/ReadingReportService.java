@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class ReadingReportService {
 
@@ -17,18 +16,18 @@ public class ReadingReportService {
         try (var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
                 "USER_GENERATE_READING_REPORT",
                 reportService::parse,
-                User.class,
                 Map.of())
         ) {
             service.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, User> record) throws IOException {
+    private void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
+        var message = record.value();
         System.out.println("------------------------------------------");
-        System.out.println("Processing report for " + record.value());
+        System.out.println("Processing report for " + message.getPayload());
 
-        var user = record.value();
+        var user = message.getPayload();
         var target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);
         IO.append(target, "Created for " + user.getUuid());
