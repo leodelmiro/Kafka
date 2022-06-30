@@ -1,5 +1,7 @@
-package br.com.leodelmiro.ecommerce;
+package br.com.leodelmiro.ecommerce.dispatcher;
 
+import br.com.leodelmiro.ecommerce.CorrelationId;
+import br.com.leodelmiro.ecommerce.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -8,11 +10,11 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-class KafkaDispatcher<T> implements Closeable {
+public class KafkaDispatcher<T> implements Closeable {
 
     private final KafkaProducer<String, Message<T>> producer;
 
-    KafkaDispatcher() {
+    public KafkaDispatcher() {
         this.producer = new KafkaProducer<>(properties());
     }
 
@@ -24,13 +26,13 @@ class KafkaDispatcher<T> implements Closeable {
         return properties;
     }
 
-    void send(String topic, String key, T payload, CorrelationId correlationId)
+    public void send(String topic, String key, T payload, CorrelationId correlationId)
             throws ExecutionException, InterruptedException {
         Future<RecordMetadata> future = sendAsync(topic, key, payload, correlationId);
         future.get();
     }
 
-    Future<RecordMetadata> sendAsync(String topic, String key, T payload, CorrelationId correlationId) {
+    public Future<RecordMetadata> sendAsync(String topic, String key, T payload, CorrelationId correlationId) {
         var value = new Message<>(correlationId, payload);
         var record = new ProducerRecord<>(topic, key, value);
 

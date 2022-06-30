@@ -1,5 +1,7 @@
 package br.com.leodelmiro.ecommerce;
 
+import br.com.leodelmiro.ecommerce.consumer.KafkaService;
+import br.com.leodelmiro.ecommerce.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.math.BigDecimal;

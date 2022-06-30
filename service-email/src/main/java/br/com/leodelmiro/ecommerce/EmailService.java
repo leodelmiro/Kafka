@@ -1,5 +1,6 @@
 package br.com.leodelmiro.ecommerce;
 
+import br.com.leodelmiro.ecommerce.consumer.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.Map;

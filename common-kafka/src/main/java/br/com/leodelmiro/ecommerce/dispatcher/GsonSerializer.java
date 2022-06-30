@@ -1,5 +1,7 @@
-package br.com.leodelmiro.ecommerce;
+package br.com.leodelmiro.ecommerce.dispatcher;
 
+import br.com.leodelmiro.ecommerce.Message;
+import br.com.leodelmiro.ecommerce.MessageAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.kafka.common.serialization.Serializer;

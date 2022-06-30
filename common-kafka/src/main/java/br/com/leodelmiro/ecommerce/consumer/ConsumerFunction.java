@@ -1,5 +1,6 @@
-package br.com.leodelmiro.ecommerce;
+package br.com.leodelmiro.ecommerce.consumer;
 
+import br.com.leodelmiro.ecommerce.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.concurrent.ExecutionException;

@@ -1,5 +1,6 @@
 package br.com.leodelmiro.ecommerce;
 
+import br.com.leodelmiro.ecommerce.dispatcher.KafkaDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
