@@ -29,23 +29,28 @@ class KafkaService<T> implements Closeable {
     }
 
     private KafkaService(ConsumerFunction<T> parse, String groupId, Map<String, String> properties) {
-        this.consumer = new KafkaConsumer<>(getProperties(groupId,properties));
+        this.consumer = new KafkaConsumer<>(getProperties(groupId, properties));
         this.parse = parse;
     }
 
-    void run() {
-        while (true) {
-            var records = consumer.poll(Duration.ofMillis(100));
-            if (!records.isEmpty()) {
-                System.out.println("Encontrei " + records.count() + " registros");
-                for (var record : records) {
-                    try {
-                        parse.consume(record);
-                    } catch (Exception e) {
-                        // only catches Exception no matter which Exception
-                        // i want to recover and parse the next one
-                        // so far, just logging the exception for this message
-                        e.printStackTrace();
+    void run() throws ExecutionException, InterruptedException {
+        try (var deadLetter = new KafkaDispatcher<>()) {
+            while (true) {
+                var records = consumer.poll(Duration.ofMillis(100));
+                if (!records.isEmpty()) {
+                    System.out.println("Encontrei " + records.count() + " registros");
+                    for (var record : records) {
+                        try {
+                            parse.consume(record);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            var message = record.value();
+                            deadLetter.send("ECOMMERCE_DEADLETTER",
+                                    message.getId().toString(),
+                                    new GsonSerializer().serialize("", message).toString(),
+                                    message.getId().continueWith("DeadLetter")
+                            );
+                        }
                     }
                 }
             }
@@ -59,6 +64,7 @@ class KafkaService<T> implements Closeable {
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
         properties.putAll(overrideProperties);
         return properties;
     }
