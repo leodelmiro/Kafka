@@ -1,20 +1,19 @@
 package br.com.leodelmiro.ecommerce;
 
-import br.com.leodelmiro.ecommerce.consumer.KafkaService;
+import br.com.leodelmiro.ecommerce.consumer.ConsumerService;
+import br.com.leodelmiro.ecommerce.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-public class CreateUserService {
+public class CreateUserService implements ConsumerService<Order> {
 
     private final Connection connection;
 
-    CreateUserService() throws SQLException {
+    private CreateUserService() throws SQLException {
         String url = "jdbc:sqlite:target/users_database.db";
         this.connection = DriverManager.getConnection(url);
         try {
@@ -28,18 +27,21 @@ public class CreateUserService {
 
     }
 
-    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
-        var creatUserService = new CreateUserService();
-        try (var service = new KafkaService<>(CreateUserService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                creatUserService::parse,
-                Map.of())
-        ) {
-            service.run();
-        }
+    public static void main(String[] args) {
+        new ServiceRunner<>(CreateUserService::new).start(1);
     }
 
-    private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return CreateUserService.class.getSimpleName();
+    }
+
+    public void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
         var message = record.value();
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking new user");
@@ -50,13 +52,15 @@ public class CreateUserService {
         }
     }
 
+
     private void insertNewUser(String email) throws SQLException {
         var insert = connection.prepareStatement("insert into Users (uuid, email) " +
                 "values (?,?)");
-        insert.setString(1, UUID.randomUUID().toString());
+        String uuid = UUID.randomUUID().toString();
+        insert.setString(1, uuid);
         insert.setString(2, email);
         insert.execute();
-        System.out.println("Usuário uuid e " + email + " adicionado");
+        System.out.println("Usuário " + uuid + "e email " + email + "adicionado");
     }
 
     private boolean isNewUser(String email) throws SQLException {

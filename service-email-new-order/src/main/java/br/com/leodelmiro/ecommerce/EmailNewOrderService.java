@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 public class EmailNewOrderService implements ConsumerService<Order> {
 
     public static void main(String[] args) {
-        new ServiceRunner(EmailNewOrderService::new).start(1);
+        new ServiceRunner<>(EmailNewOrderService::new).start(1);
     }
 
     private final KafkaDispatcher<Email> emailDispatcher = new KafkaDispatcher<>();

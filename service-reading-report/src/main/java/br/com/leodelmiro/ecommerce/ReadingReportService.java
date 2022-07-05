@@ -13,7 +13,7 @@ public class ReadingReportService implements ConsumerService<User> {
     private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
     public static void main(String[] args) {
-        new ServiceRunner(ReadingReportService::new).start(5);
+        new ServiceRunner<>(ReadingReportService::new).start(5);
     }
 
     @Override
