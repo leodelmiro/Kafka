@@ -1,6 +1,4 @@
-package br.com.leodelmiro.ecommerce;
-
-import br.com.leodelmiro.ecommerce.consumer.KafkaService;
+package br.com.leodelmiro.ecommerce.consumer;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

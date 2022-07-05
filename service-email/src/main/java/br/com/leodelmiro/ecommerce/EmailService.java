@@ -1,5 +1,7 @@
 package br.com.leodelmiro.ecommerce;
 
+import br.com.leodelmiro.ecommerce.consumer.ConsumerService;
+import br.com.leodelmiro.ecommerce.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class EmailService implements ConsumerService<Email> {

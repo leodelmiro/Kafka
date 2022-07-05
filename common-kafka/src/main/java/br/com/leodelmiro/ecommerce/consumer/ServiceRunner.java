@@ -1,4 +1,4 @@
-package br.com.leodelmiro.ecommerce;
+package br.com.leodelmiro.ecommerce.consumer;
 
 import java.util.concurrent.Executors;
 
