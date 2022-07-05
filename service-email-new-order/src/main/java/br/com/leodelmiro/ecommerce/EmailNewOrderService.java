@@ -1,28 +1,31 @@
 package br.com.leodelmiro.ecommerce;
 
-import br.com.leodelmiro.ecommerce.consumer.KafkaService;
+import br.com.leodelmiro.ecommerce.consumer.ConsumerService;
+import br.com.leodelmiro.ecommerce.consumer.ServiceRunner;
 import br.com.leodelmiro.ecommerce.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class EmailNewOrderService {
+public class EmailNewOrderService implements ConsumerService<Order> {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var fraudService = new EmailNewOrderService();
-        try (var service = new KafkaService(EmailNewOrderService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                fraudService::parse,
-                Map.of())
-        ) {
-            service.run();
-        }
+    public static void main(String[] args) {
+        new ServiceRunner(EmailNewOrderService::new).start(1);
     }
 
     private final KafkaDispatcher<Email> emailDispatcher = new KafkaDispatcher<>();
 
-    private void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return EmailNewOrderService.class.getSimpleName();
+    }
+
+    public void parse(ConsumerRecord<String, Message<Order>> record) throws ExecutionException, InterruptedException {
         var message = record.value();
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, preparing email");
