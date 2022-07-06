@@ -36,4 +36,8 @@ public class LocalDatabase {
         }
         return preparedStatement;
     }
+
+    public void close() throws SQLException {
+        connection.close();
+    }
 }
